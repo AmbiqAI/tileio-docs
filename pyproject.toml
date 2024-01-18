@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "tileio"
+version = "1.0.0"
+description = "Tileio documentation"
+license = "BSD-3-Clause"
+authors = ["Adam Page <adam.page@ambiq.com>"]
+readme = "README.md"
+homepage = "https://ambiq.ai"
+repository = "https://github.com/AmbiqAI/tileio-docs"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.4.6"
+mkdocstrings-python = "^1.7.3"
+markdown-include = "^0.8.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
