@@ -11,9 +11,14 @@ repository = "https://github.com/AmbiqAI/tileio-docs"
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
 mkdocs = "^1.5.3"
-mkdocs-material = "^9.4.6"
-mkdocstrings-python = "^1.7.3"
+mkdocs-material = "^9.5.8"
+mkdocstrings-python = "^1.8.0"
 markdown-include = "^0.8.1"
+mkdocs-exclude = "^1.0.2"
+mkdocs-jupyter = "^0.24.8"
+mkdocs-gen-files = "^0.5.0"
+mkdocs-section-index = "^0.3.9"
+mkdocs-literate-nav = "^0.6.1"
 
 [build-system]
 requires = ["poetry-core"]
