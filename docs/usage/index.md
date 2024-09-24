@@ -35,7 +35,7 @@ To get started, launch Tileio and click on the `+` button. You will then be pres
 Once the dashboard has been created, navigate to the dashboard by tapping on the dashboard card. The dashboard will be displayed with a set of tiles.
 
 <figure markdown="span">
-  ![Tileio select dashboard](/assets/usage/tileio-select-dashboard.gif){ width="720" }
+  ![Tileio select dashboard](../assets/usage/tileio-select-dashboard.gif){ width="720" }
 </figure>
 
 ## Connecting to a Device
@@ -52,5 +52,5 @@ To connect to a device, click on the `Select Device` in the navigation bar. This
 Once selecting a device, the dialog will display the device name and the connection status. To now connect to the device, click on the `connect` button. After a successful connection, the connection status will change to `connected` and data will start streaming to the dashboard tiles.
 
 <figure markdown="span">
-  ![Tileio connect device](/assets/usage/tileio-connect-device.gif){ width="720" }
+  ![Tileio connect device](../assets/usage/tileio-connect-device.gif){ width="720" }
 </figure>

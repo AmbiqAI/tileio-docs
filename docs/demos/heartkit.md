@@ -35,9 +35,9 @@ In the first stage, 2 seconds of sensor data is collected- either from stored su
 
 The HeartKit demo leverages a multi-head network- a backbone denoising and segmentation model followed by 2 upstream heads:
 
-* [__Denoising model__](/assets/demos/heartkit/den-tcn-sm.json) utilizes a small 1-D TCN architecture to remove noise from the ECG signal.
-* [__Segmentation model__](/assets/demos/heartkit/seg-4-tcn-sm) utilizes a small 1-D TCN architecture to perform ECG segmentation.
-* [__Rhythm head__](/assets/demos/heartkit/arr-4-eff-sm.json) utilizes a 1-D MBConv CNN to detect 4-class arrhythmias.
+* [__Denoising model__](../assets/demos/heartkit/den-tcn-sm.json) utilizes a small 1-D TCN architecture to remove noise from the ECG signal.
+* [__Segmentation model__](../assets/assets/demos/heartkit/seg-4-tcn-sm) utilizes a small 1-D TCN architecture to perform ECG segmentation.
+* [__Rhythm head__](../assets/demos/heartkit/arr-4-eff-sm.json) utilizes a 1-D MBConv CNN to detect 4-class arrhythmias.
 * __HRV head__ utilizes segmentation results to derive a number of useful metrics including heart rate and heart rate variability (HRV).
 
 ---
@@ -70,7 +70,7 @@ If using a fresh Apollo 4 EVB, the EVB will need to be flashed with the latest H
 
 The only required tool is the J-Link software, which can be downloaded from the [SEGGER website](https://www.segger.com/downloads/jlink/). The J-Link software includes the JFlashLite tool, which is used to flash the firmware to the EVB.
 
-1. :material-download: Download the firmware binary [heartkit.bin](/assets/demos/heartkit/heartkit.bin){:download="heartkit.bin"}.
+1. :material-download: Download the firmware binary [heartkit.bin](../assets/demos/heartkit/heartkit.bin){:download="heartkit.bin"}.
 2. :material-usb: Connect the EVB to your computer using a USB-C cable.
 3. :material-rocket-launch: Launch JFlashLite tool.
 4. :material-tune: Select the following options and press `OK`:
@@ -86,7 +86,7 @@ For users who want to compile the firmware or to view the source code, please re
 ### Hardware Setup
 
 <figure markdown="span">
-  ![max86150-5pin-header](/assets/demos/heartkit/max86150-5pin-header.webp){ width="480" }
+  ![max86150-5pin-header](../assets/demos/heartkit/max86150-5pin-header.webp){ width="480" }
   <figcaption>MAX86150 Sensor Board</figcaption>
 </figure>
 
@@ -110,7 +110,7 @@ In order to connect the MAX86150 breakout board to the EVB, we leverage the Qwii
 
 3. Launch Tileio app on your ios device or go to [Tileio Web](https://ambiqai.github.io/tileio) using a Desktop Chrome browser.
 
-4. If this is the first time using Tileio, you will need to add the HeartKit dashboard. Click on the "+" icon on the top right of the navigation bar. You can either select 'HeartKit Dashboard' from the built-in list or upload latest configuration file ([hk-dashboard-config.json](/assets/demos/heartkit/){:download="hk-dashboard-config.json"}).
+4. If this is the first time using Tileio, you will need to add the HeartKit dashboard. Click on the "+" icon on the top right of the navigation bar. You can either select 'HeartKit Dashboard' from the built-in list or upload latest configuration file ([hk-dashboard-config.json](../assets/demos/heartkit/){:download="hk-dashboard-config.json"}).
 
 5. Once the dashboard has been created, you can view the dashboard by clicking on the dashboard card.
 
@@ -123,7 +123,7 @@ In order to connect the MAX86150 breakout board to the EVB, we leverage the Qwii
 9. Use the "Input Select" to switch subject ECG input and "Noise Input" slider to inject additional noise.
 
 <figure markdown="span">
-  ![Tielio Dashboard](/assets/demos/heartkit/hk-dashboard-overview.png){ width="768" }
+  ![Tielio Dashboard](../assets/demos/heartkit/hk-dashboard-overview.png){ width="768" }
   <figcaption></figcaption>
 </figure>
 

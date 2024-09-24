@@ -29,7 +29,7 @@ The `Dashboard Settings Dialog` contains the following tabs:
 The first step in configuring a new dashboard is to set the dashboard name and description. This can be done by clicking on the dashboard button in the navigation bar and selecting the `Info` tab. The dashboard name and description will be displayed at the top of the dashboard. To edit the dashboard name and description, click on the `pencil` icon. To enable styling, the description accepts [markdown](https://www.markdownguide.org/basic-syntax/).
 
 <figure markdown="span">
-  ![Tielio Info Setup](/assets/tileio-imu-info.png){ width="768" }
+  ![Tielio Info Setup](../assets/tileio-imu-info.png){ width="768" }
   <figcaption></figcaption>
 </figure>
 
@@ -48,6 +48,6 @@ For each required slot, click on the :material-pencil: `pencil` icon to edit the
 * **metrics**: A list of metrics broadcasted by the device (e.g. e.g. fall).
 
 <figure markdown="span">
-  ![Tielio Slot Setup](/assets/tileio-slot-setup.png){ width="768" }
+  ![Tielio Slot Setup](../assets/tileio-slot-setup.png){ width="768" }
   <figcaption></figcaption>
 </figure>

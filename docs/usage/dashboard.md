@@ -14,7 +14,7 @@ A dashboard consists of the following components:
 The dashboard name and description can be configured by clicking on the dashboard button in the navigation bar and selecting the `Info` tab. The dashboard name and description will be displayed at the top of the dashboard. To edit the dashboard name and description, click on the `pencil` icon. To enable styling, the description accepts [markdown](https://www.markdownguide.org/basic-syntax/).
 
 <figure markdown="span">
-  ![Tielio Info Setup](/assets/tileio-imu-info.png){ width="768" }
+  ![Tielio Info Setup](../assets/tileio-imu-info.png){ width="768" }
   <figcaption></figcaption>
 </figure>
 
@@ -35,7 +35,7 @@ In order for Tileio to know how to interpret the data being streamed from a devi
 The slots can be configured in the dashboard by clicking on the dashboard button in the navigation bar and selecting the `Slots` tab. The slots will be displayed as a list of cards with the above information displayed. To edit a slot, click on the `pencil` icon for the desired slot.
 
 <figure markdown="span">
-  ![Tielio Slot Setup](/assets/tileio-slot-setup.png){ width="768" }
+  ![Tielio Slot Setup](../assets/tileio-slot-setup.png){ width="768" }
   <figcaption></figcaption>
 </figure>
 
@@ -54,7 +54,7 @@ In order for Tileio to know how to interpret the I/O data being transferred to t
 The I/O elements can be configured in the dashboard by clicking on the dashboard button in the navigation bar and selecting the `I/O` tab. The I/O elements will be displayed as a list of cards with the above information displayed. To edit an I/O element, click on the `pencil` icon for the desired I/O element.
 
 <figure markdown="span">
-  ![Tielio IO Setup](/assets/tileio-io-setup.png){ width="768" }
+  ![Tielio IO Setup](../assets/tileio-io-setup.png){ width="768" }
   <figcaption></figcaption>
 </figure>
 
@@ -70,6 +70,6 @@ A dashboard consists of a collection of tiles that display data from a device. E
 The tiles can be configured in the dashboard by clicking on the dashboard button in the navigation bar and selecting the `Tiles` tab. The tiles will be displayed as a list of cards with the above information displayed along with buttons to move the tile, change the size, delete the tile, and edit the tile configuration. To edit a tile, click on the `pencil` icon for the desired tile. This will display the tile's custom parameter form. Please refer to [Add Tile Guide](../guides/new-tile.md) for more information on how to add a new tile to the dashboard.
 
 <figure markdown="span">
-  ![Tielio Tiles Setup](/assets/tileio-tile-setup.png){ width="768" }
+  ![Tielio Tiles Setup](../assets/tileio-tile-setup.png){ width="768" }
   <figcaption></figcaption>
 </figure>
