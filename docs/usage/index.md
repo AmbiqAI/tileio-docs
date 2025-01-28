@@ -40,7 +40,7 @@ Once the dashboard has been created, navigate to the dashboard by tapping on the
 
 ## Connecting to a Device
 
-Tileio can connect to a device via webBLE or webUSB. A **device** refers to an Ambiq evaluation board (e.g. Apollo4 Blue EVB) that is running a Tileio demo. The device must be powered on and in a state where it is advertising. For list of available demos, refer to [Demos](../guides/demos.md). To get started creating a new demo, refer to [New Demo Guide](../guides/new-demo.md).
+Tileio can connect to a device via webBLE or webUSB. A **device** refers to an Ambiq evaluation board (e.g. Apollo4 Blue EVB) that is running a Tileio demo. The device must be powered on and in a state where it is advertising. For list of available demos, refer to [Demos](../demos/index.md). To get started creating a new demo, refer to [New Demo Guide](../guides/new-demo.md).
 
 To connect to a device, click on the `Select Device` in the navigation bar. This will display a dialog to allow selecting a target device. First, you will need to perform the following steps to connect to a device:
 

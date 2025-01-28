@@ -11,7 +11,7 @@ title: Home
 
 - :material-rocket-launch: [Getting Started](usage/index.md)
 - :material-api: [API Documentation](api/index.md)
-- :simple-docsdotrs: [Usage Examples](examples/index.md)
+- :simple-docsdotrs: [Demo Examples](demos/index.md)
 - :material-hexagon-multiple: [Explore Guides](guides/index.md)
 
 </div>

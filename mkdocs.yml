@@ -20,12 +20,12 @@ nav:
 
   - Demos:
     - demos/index.md
-    - HeartKit Demo: demos/heartkit.md
+    - HeartKit ECG Heart Analysis Demo: demos/heartkit-ecg-demo.md
+    - HeartKit Vital Signs Monitoring Demo: demos/heartkit-vital-signs.md
 
   - Guides:
     - guides/index.md
     - New Dashboard: guides/new-dashboard.md
-    - Demos: guides/demos.md
 
 theme:
   name: material
