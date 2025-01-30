@@ -48,7 +48,7 @@ The demo contains the following AI models:
 
 The following items are needed to run the demo:
 
-* 1x Ambiq Apollo510 EVB (Rev 2.1)
+* 1x [Ambiq Apollo510 EVB (Rev 2.1)](https://www.ambiq.top/en/apollo510-soc-eval-board)
 * 1x [AMS/OSRAM AS7058 vitals sensor](https://ams-osram.com/products/boards-kits-accessories/kits/ams-as7058-evm-eb-evaluation-kit)
 * 1x Laptop/PC with desktop Chrome browser
 * 2x USB-C cables
@@ -59,7 +59,7 @@ The following items are needed to run the demo:
 
 ### Supported Platforms
 
-The following Ambiq EVBs are currently supported by the demo. Be sure to set the **PLATFORM** variable to the desired value.
+The following Ambiq EVBs are currently supported by the demo.
 
 * **apollo510_evb** - [Apollo510 SoC Eval Board](https://www.ambiq.top/en/apollo510-soc-eval-board)
 
@@ -70,7 +70,7 @@ If using a fresh Apollo510 EVB, the EVB will need to be flashed with the latest 
 The only required tool is the J-Link software, which can be downloaded from the [SEGGER website](https://www.segger.com/downloads/jlink/). The J-Link software includes the JFlashLite tool, which is used to flash the firmware to the EVB.
 
 1. :material-download: Download and extract zip file for target platform:
-    * [ap510-hk-fw-rv301.zip](https://ambiqai-model-zoo.s3-us-west-2.amazonaws.com/demos/hk-vitals-demo/ap510-hk-fw-rv301.zip){:download="ap510-hk-fw-rv301.zip"}.
+    * Apollo510 EVB: [ap510-hk-fw-rv301.zip](https://ambiqai-model-zoo.s3-us-west-2.amazonaws.com/demos/hk-vitals-demo/ap510-hk-fw-rv301.zip){:download="ap510-hk-fw-rv301.zip"}.
 2. :material-usb: Connect a USB-C cable from your computer to MAIN_USB (J16) USB port on the Apollo510 EVB.
 3. :material-usb: Connect a USB-C cable from your computer to USB_AP5 (J18) USB port on the Apollo510 EVB.
 4. :material-power: Turn the EVB power on by setting switch SW4 to the ON position.
