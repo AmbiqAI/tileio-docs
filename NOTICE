@@ -1,0 +1,15 @@
+Tileio Documentation
+Copyright (c) 2026, Ambiq
+
+This product includes Ambiq-authored content licensed under the BSD 3-Clause
+License. See the LICENSE file for the full license text.
+
+This documentation site is built with third-party Python packages. Each
+package retains its own license and copyright notice; see
+THIRD-PARTY-NOTICES.md for the full list of packages, versions, licenses and
+license texts.
+
+Tileio brand assets (logos, icons and related marks) under the `assets/`
+directory are trademarks of Ambiq and are not licensed under the BSD 3-Clause
+License. They may not be reused, modified or redistributed without
+permission from Ambiq.

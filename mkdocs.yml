@@ -27,6 +27,8 @@ nav:
     - guides/index.md
     - New Dashboard: guides/new-dashboard.md
 
+  - Third-Party Notices: third-party-notices.md
+
 theme:
   name: material
   favicon: assets/favicon.png
@@ -80,6 +82,9 @@ theme:
     - content.tabs.link # all code tabs change simultaneously
 
 
+hooks:
+  - hooks/copy_notices.py
+
 plugins:
   - search
   - mkdocstrings:
@@ -116,6 +121,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets:
       base_path: 'docs/'
+      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  checks:
+    # Mirrors the site build environment in deploy.yaml: ubuntu-latest with
+    # Python 3.11, which is the target environment tools/gen_notices.py
+    # inventories.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+      - name: Install dependencies
+        run: poetry sync --no-root --with dev
+      - name: License classifier self-test
+        run: poetry run python tools/gen_notices.py --selftest
+      - name: Third-party notices are current and allow-listed
+        run: poetry run python tools/gen_notices.py --check
+      - name: Build the docs site
+        # Not --strict: pre-existing broken links are tracked separately.
+        run: poetry run mkdocs build
