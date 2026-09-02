@@ -10,7 +10,10 @@ ran this script". It is every poetry.lock entry that belongs to the main
 dependency group and whose environment marker evaluates true for the target
 environment declared in TARGET_ENVIRONMENT below. Markers are evaluated with
 packaging against that explicit dictionary, never against the running
-interpreter, so the same file is produced on Linux and on macOS.
+interpreter, so the same file is produced on Linux and on macOS. Marker
+variables the dictionary does not model, such as the runner's CPU architecture
+or patch-level Python version, are listed in UNMODELLED_MARKER_VARIABLES and
+hard-fail before evaluation instead of being guessed.
 
 Usage:
 
@@ -30,6 +33,12 @@ identical whichever host generated it.
 As defense in depth, the script verifies that every installed version
 pip-licenses reports matches the version pinned in poetry.lock; a mismatch is
 a hard failure naming the offending package.
+
+Where a package declares an ambiguous license string, such as bare "Apache"
+with no version, AMBIGUOUS_LICENSE_RESOLUTIONS records the resolution together
+with the lines that must appear in the license text bundled with the installed
+distribution. The check runs on every run: missing or mismatched text blocks
+the package rather than resolving it.
 
 ADR-0005 (Tier 1) allows MIT, BSD, Apache-2.0, ISC, MPL-2.0 and PSF licensed
 dependencies. This is an allow-list built on an exact alias table, not a
@@ -73,25 +82,37 @@ TARGET_GROUP = "main"
 # generating on macOS and checking on Linux CI produce the same file.
 TARGET_PLATFORM = "linux"
 TARGET_PYTHON_VERSION = "3.11"
+#
+# Only variables this script can state with confidence are listed. Anything
+# absent here is unmodelled: see UNMODELLED_MARKER_VARIABLES below, which is
+# checked before any marker is evaluated. That order matters, because
+# packaging's Marker.evaluate() merges this dictionary over the running
+# interpreter's environment, so an unmodelled variable that reached evaluation
+# would silently take the value of the generating machine.
 TARGET_ENVIRONMENT = {
     "implementation_name": "cpython",
-    "implementation_version": "3.11.0",
     "os_name": "posix",
-    "platform_machine": "x86_64",
     "platform_python_implementation": "CPython",
-    "platform_release": "",
     "platform_system": "Linux",
-    "platform_version": "",
-    "python_full_version": "3.11.0",
     "python_version": "3.11",
     "sys_platform": "linux",
 }
 
 # Marker variables this script does not model with enough confidence to decide
-# inclusion. The runner's kernel release and patch-level Python version are not
-# fixed, so a lock marker that depends on them needs a human decision rather
-# than a guess from this script.
-UNMODELLED_MARKER_VARIABLES = ("platform_release", "platform_version", "extra")
+# inclusion. The runner's kernel release, CPU architecture and patch-level
+# Python version are not fixed by anything in this repository, so a lock marker
+# that depends on them needs a human decision rather than a guess from this
+# script. Every name here is deliberately absent from TARGET_ENVIRONMENT, and
+# marker_matches_target() hard-fails on it before evaluation, so no guessed or
+# host-supplied value can decide inclusion.
+UNMODELLED_MARKER_VARIABLES = (
+    "platform_release",
+    "platform_version",
+    "platform_machine",
+    "python_full_version",
+    "implementation_version",
+    "extra",
+)
 
 # ADR-0005 Tier 1 allow-list families. Names are literal: MPL-2.0 and
 # Apache-2.0 only, so MPL-1.1, Apache-1.x and BSD-4-Clause are not covered by
@@ -138,12 +159,22 @@ CANONICAL_ALIASES: dict[str, str] = {
 
 # Packages whose declared license string is ambiguous but whose bundled license
 # text settles it. Applied only when the reported license string matches
-# exactly, and only to resolve to a family that is already on the allow-list.
-# This records evidence; it does not grant an exception to the allow-list.
-AMBIGUOUS_LICENSE_RESOLUTIONS: dict[str, dict[str, str]] = {
+# exactly, only to resolve to a family that is already on the allow-list, and
+# only when the bundled license text the run collected actually carries the
+# identifying lines in "evidence_text". This records evidence checked against
+# the distribution on every run; it does not grant an exception to the
+# allow-list. A package with no bundled license text, or with text missing any
+# required line, is blocked rather than resolved.
+#
+# "evidence_text" holds lines that must all appear in the bundled text, matched
+# after whitespace is collapsed. For Apache-2.0 the header lines "Apache
+# License" and "Version 2.0, January 2004" together distinguish the 2.0 text
+# from Apache-1.x, which is not Tier 1.
+AMBIGUOUS_LICENSE_RESOLUTIONS: dict[str, dict] = {
     "mkdocs-exclude": {
         "license": "Apache",
         "family": "apache-2.0",
+        "evidence_text": ("Apache License", "Version 2.0, January 2004"),
         "evidence": (
             "the LICENSE file bundled in the distribution is the Apache "
             "License, Version 2.0, verbatim; the package metadata just says "
@@ -266,10 +297,43 @@ def license_allowed(license_str: str) -> bool:
     return allowed
 
 
+def evidence_failure(name: str, license_text: str | None) -> str | None:
+    """Return why a recorded ambiguous-license resolution is unsupported.
+
+    Returns None when the package's bundled license text carries every line
+    required by its AMBIGUOUS_LICENSE_RESOLUTIONS entry. Otherwise it returns a
+    sentence naming the package and what is missing, and the caller blocks the
+    package. A package with no entry also returns a sentence, because asking
+    this question about it means the caller has already lost the plot.
+    """
+    key = normalize_name(name)
+    resolution = AMBIGUOUS_LICENSE_RESOLUTIONS.get(key)
+    if resolution is None:
+        return f"{name} has no recorded ambiguous-license resolution"
+    required = resolution["evidence_text"]
+    text = _normalize_text(license_text or "")
+    if not text or text.upper() == "UNKNOWN":
+        return (
+            f"{name} declares an ambiguous license and no license text is "
+            "bundled with the distribution, so the recorded resolution to "
+            f"{resolution['family']} cannot be confirmed"
+        )
+    missing = [line for line in required if _normalize_text(line) not in text]
+    if missing:
+        return (
+            f"{name} bundles license text that does not carry "
+            + ", ".join(repr(line) for line in missing)
+            + f", so the recorded resolution to {resolution['family']} does "
+            "not match the distribution"
+        )
+    return None
+
+
 def classify(
     name: str,
     license_str: str,
     exceptions: dict[str, dict[str, str]] | None = None,
+    license_text: str | None = None,
 ) -> str:
     """Classify a package as one of: allowed, exception, resolved, blocked.
 
@@ -277,7 +341,10 @@ def classify(
     family is blocked unless it has an explicitly approved exception. There is
     no "recorded but passing" middle ground. "resolved" means the declared
     string was ambiguous and was settled from the bundled license text through
-    AMBIGUOUS_LICENSE_RESOLUTIONS; it still lands inside the allow-list.
+    AMBIGUOUS_LICENSE_RESOLUTIONS; it still lands inside the allow-list, and it
+    applies only when license_text, the text this run collected from the
+    installed distribution, carries the evidence lines recorded there. Missing
+    or mismatched text blocks.
     """
     if exceptions is None:
         exceptions = APPROVED_EXCEPTIONS
@@ -291,9 +358,15 @@ def classify(
         resolution is not None
         and _normalize_text(resolution["license"]) == _normalize_text(license_str)
         and resolution["family"] in ALLOWED_FAMILIES
+        and evidence_failure(name, license_text) is None
     ):
         return "resolved"
     return "blocked"
+
+
+def classify_package(p: dict, exceptions: dict[str, dict[str, str]] | None = None) -> str:
+    """Classify one pip-licenses record, including its bundled license text."""
+    return classify(p["Name"], p["License"], exceptions, p.get("LicenseText"))
 
 
 # --------------------------------------------------------------------------
@@ -451,9 +524,9 @@ def render(
 ) -> str:
     packages = sorted(packages, key=lambda p: p["Name"].lower())
 
-    blocked = [p for p in packages if classify(p["Name"], p["License"]) == "blocked"]
-    exceptions = [p for p in packages if classify(p["Name"], p["License"]) == "exception"]
-    resolved = [p for p in packages if classify(p["Name"], p["License"]) == "resolved"]
+    blocked = [p for p in packages if classify_package(p) == "blocked"]
+    exceptions = [p for p in packages if classify_package(p) == "exception"]
+    resolved = [p for p in packages if classify_package(p) == "resolved"]
 
     lines: list[str] = []
     lines.append("# Third-Party Notices")
@@ -516,6 +589,10 @@ def render(
         lines.append("")
         for p in blocked:
             lines.append(f"- **{p['Name']} {p['Version']}** - {p['License']}")
+            if normalize_name(p["Name"]) in AMBIGUOUS_LICENSE_RESOLUTIONS:
+                reason = evidence_failure(p["Name"], p.get("LicenseText"))
+                if reason:
+                    lines.append(f"  - Recorded resolution not applied: {reason}.")
         lines.append("")
 
     if exceptions:
@@ -640,19 +717,101 @@ SELFTEST_CASES: list[tuple[str, bool]] = [
     ("GNU Lesser General Public License v2 (LGPLv2)", False),
 ]
 
-# (package name, license string, exceptions table, expected classification).
-SELFTEST_CLASSIFY_CASES: list[tuple[str, str, dict[str, dict[str, str]], str]] = [
-    ("requests", "Apache Software License", {}, "allowed"),
-    ("some-pkg", "GNU General Public License v3 (GPLv3); MIT License", {}, "blocked"),
+# Stand-in license texts for the classify() cases below. The Apache-2.0 sample
+# reproduces the header lines the resolution table requires, with the same
+# ragged indentation the real file uses, so the evidence check is exercised
+# against text that needs whitespace collapsing.
+SELFTEST_APACHE_TEXT = """
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+"""
+
+SELFTEST_APACHE_1_1_TEXT = """
+                                 Apache License
+                           Version 1.1, 2000
+"""
+
+SELFTEST_MIT_TEXT = """
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+"""
+
+# (package name, license string, exceptions table, bundled license text,
+# expected classification).
+SELFTEST_CLASSIFY_CASES: list[
+    tuple[str, str, dict[str, dict[str, str]], str | None, str]
+] = [
+    ("requests", "Apache Software License", {}, SELFTEST_APACHE_TEXT, "allowed"),
+    (
+        "some-pkg",
+        "GNU General Public License v3 (GPLv3); MIT License",
+        {},
+        SELFTEST_MIT_TEXT,
+        "blocked",
+    ),
     (
         "some-pkg",
         "GNU General Public License v3 (GPLv3); MIT License",
         {"some-pkg": {"approver": "test", "date": "2026-01-01", "reason": "test"}},
+        SELFTEST_MIT_TEXT,
         "exception",
     ),
-    ("mkdocs-exclude", "Apache", {}, "resolved"),
-    ("mkdocs-exclude", "GPL-3.0-only", {}, "blocked"),
+    # The recorded resolution applies only when the bundled text backs it.
+    ("mkdocs-exclude", "Apache", {}, SELFTEST_APACHE_TEXT, "resolved"),
+    ("mkdocs-exclude", "GPL-3.0-only", {}, SELFTEST_APACHE_TEXT, "blocked"),
+    # Evidence mismatch: the text is some other license entirely.
+    ("mkdocs-exclude", "Apache", {}, SELFTEST_MIT_TEXT, "blocked"),
+    # Evidence mismatch: right family name, wrong version line.
+    ("mkdocs-exclude", "Apache", {}, SELFTEST_APACHE_1_1_TEXT, "blocked"),
+    # No bundled license text at all, in either shape pip-licenses emits.
+    ("mkdocs-exclude", "Apache", {}, "", "blocked"),
+    ("mkdocs-exclude", "Apache", {}, "UNKNOWN", "blocked"),
+    ("mkdocs-exclude", "Apache", {}, None, "blocked"),
 ]
+
+# (poetry.lock entry name, marker text, expected outcome). "hard-fail" means
+# marker_matches_target() must exit rather than guess, because the marker names
+# a variable TARGET_ENVIRONMENT does not model.
+SELFTEST_MARKER_CASES: list[tuple[str, str, object]] = [
+    # Modelled variables still decide inclusion normally.
+    ("modelled-pkg", 'python_version == "3.11"', True),
+    ("modelled-pkg", 'python_version < "3.12"', True),
+    ("modelled-pkg", 'sys_platform == "linux"', True),
+    ("modelled-pkg", 'sys_platform == "win32"', False),
+    ("modelled-pkg", 'platform_system == "Darwin"', False),
+    ("modelled-pkg", 'implementation_name == "pypy"', False),
+    (
+        "modelled-pkg",
+        'sys_platform != "win32" and sys_platform != "emscripten"',
+        True,
+    ),
+    # Unmodelled variables must hard-fail rather than evaluate against a
+    # guessed patch level, architecture or interpreter build.
+    ("unmodelled-pkg", 'python_full_version >= "3.11.4"', "hard-fail"),
+    ("unmodelled-pkg", 'implementation_version >= "3.11.4"', "hard-fail"),
+    ("unmodelled-pkg", 'platform_machine == "x86_64"', "hard-fail"),
+    ("unmodelled-pkg", 'platform_release > "5.0"', "hard-fail"),
+    ("unmodelled-pkg", 'platform_version != ""', "hard-fail"),
+    ("unmodelled-pkg", 'extra == "docs"', "hard-fail"),
+    # An unmodelled variable anywhere in the expression is enough to fail.
+    (
+        "unmodelled-pkg",
+        'sys_platform == "linux" and platform_machine == "aarch64"',
+        "hard-fail",
+    ),
+]
+
+
+def _marker_outcome(name: str, marker_text: str) -> object:
+    """Run marker_matches_target(), reporting a hard failure as "hard-fail"."""
+    try:
+        return marker_matches_target(name, marker_text)
+    except SystemExit:
+        return "hard-fail"
 
 
 def selftest() -> int:
@@ -668,13 +827,28 @@ def selftest() -> int:
             f"  {status:7} {'allow' if expected else 'block':8} {license_str!r}"
         )
     print("gen_notices --selftest: classify()")
-    for name, license_str, exceptions, expected in SELFTEST_CLASSIFY_CASES:
-        actual = classify(name, license_str, exceptions)
+    for name, license_str, exceptions, license_text, expected in SELFTEST_CLASSIFY_CASES:
+        actual = classify(name, license_str, exceptions, license_text)
         ok = actual == expected
         failures += 0 if ok else 1
         status = "ok" if ok else "FAIL"
-        print(f"  {status:7} {expected:8} {name} {license_str!r} -> {actual}")
-    total = len(SELFTEST_CASES) + len(SELFTEST_CLASSIFY_CASES)
+        evidence = _normalize_text(license_text or "")[:32] or "no license text"
+        print(
+            f"  {status:7} {expected:8} {name} {license_str!r} "
+            f"[{evidence}] -> {actual}"
+        )
+    print("gen_notices --selftest: marker_matches_target()")
+    for name, marker_text, expected in SELFTEST_MARKER_CASES:
+        actual = _marker_outcome(name, marker_text)
+        ok = actual == expected
+        failures += 0 if ok else 1
+        status = "ok" if ok else "FAIL"
+        print(f"  {status:7} {str(expected):8} {marker_text!r} -> {actual}")
+    total = (
+        len(SELFTEST_CASES)
+        + len(SELFTEST_CLASSIFY_CASES)
+        + len(SELFTEST_MARKER_CASES)
+    )
     if failures:
         print(f"gen_notices --selftest: {failures} of {total} case(s) FAILED")
         return 1
@@ -724,10 +898,10 @@ def main() -> int:
     tool_version = pip_licenses_version()
     content = render(packages, excluded_by_marker, excluded_by_group, tool_version)
 
-    blocked = [p for p in packages if classify(p["Name"], p["License"]) == "blocked"]
-    exceptions = [p for p in packages if classify(p["Name"], p["License"]) == "exception"]
-    resolved = [p for p in packages if classify(p["Name"], p["License"]) == "resolved"]
-    allowed = [p for p in packages if classify(p["Name"], p["License"]) == "allowed"]
+    blocked = [p for p in packages if classify_package(p) == "blocked"]
+    exceptions = [p for p in packages if classify_package(p) == "exception"]
+    resolved = [p for p in packages if classify_package(p) == "resolved"]
+    allowed = [p for p in packages if classify_package(p) == "allowed"]
 
     print(
         f"gen_notices: target environment {TARGET_PLATFORM} / CPython "
@@ -751,6 +925,11 @@ def main() -> int:
             f"{[(p['Name'], p['License']) for p in blocked]}",
             file=sys.stderr,
         )
+        for p in blocked:
+            if normalize_name(p["Name"]) in AMBIGUOUS_LICENSE_RESOLUTIONS:
+                reason = evidence_failure(p["Name"], p.get("LicenseText"))
+                if reason:
+                    print(f"gen_notices: BLOCKED - {reason}.", file=sys.stderr)
 
     if args.check:
         if not OUTPUT_FILE.exists():
