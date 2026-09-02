@@ -27,6 +27,8 @@ nav:
     - guides/index.md
     - New Dashboard: guides/new-dashboard.md
 
+  - Third-Party Notices: third-party-notices.md
+
 theme:
   name: material
   favicon: assets/favicon.png
@@ -79,6 +81,9 @@ theme:
     - navigation.sections  # navigation.expand or navigation.sections
     - content.tabs.link # all code tabs change simultaneously
 
+
+hooks:
+  - hooks/copy_notices.py
 
 plugins:
   - search

@@ -138,6 +138,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# generated from THIRD-PARTY-NOTICES.md by hooks/copy_notices.py
+/docs/third-party-notices.md
+
 # mypy
 .mypy_cache/
 .dmypy.json
