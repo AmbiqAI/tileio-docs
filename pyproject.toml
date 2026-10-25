@@ -9,6 +9,7 @@ homepage = "https://ambiq.ai"
 repository = "https://github.com/AmbiqAI/tileio-docs"
 
 [tool.poetry.dependencies]
+certifi = ">=2026.10.19"
 python = ">=3.11,<3.13"
 mkdocs = "^1.5.3"
 mkdocs-material = "^9.5.8"
