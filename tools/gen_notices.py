@@ -77,7 +77,7 @@ OUTPUT_FILE = REPO_ROOT / "THIRD-PARTY-NOTICES.md"
 TARGET_GROUP = "main"
 
 # The declared target environment: the deploy runner in
-# .github/workflows/deploy.yaml (ubuntu-latest, actions/setup-python 3.11).
+# .github/workflows/deploy.yaml (ubuntu-latest, uv-managed Python 3.11).
 # Marker evaluation uses this dictionary and not the running interpreter, so
 # generating on macOS and checking on Linux CI produce the same file.
 TARGET_PLATFORM = "linux"

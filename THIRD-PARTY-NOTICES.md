@@ -19,7 +19,7 @@ ADR-0005 (Tier 1) allow-list: apache-2.0, bsd, isc, mit, mpl-2.0, psf. 84 packag
 | babel | 2.16.0 | BSD License | https://babel.pocoo.org/ |
 | beautifulsoup4 | 4.12.3 | MIT License | https://www.crummy.com/software/BeautifulSoup/bs4/ |
 | bleach | 6.1.0 | Apache Software License | https://github.com/mozilla/bleach |
-| certifi | 2024.8.30 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
+| certifi | 2026.10.23 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
 | charset-normalizer | 3.3.2 | MIT License | https://github.com/Ousret/charset_normalizer |
 | click | 8.1.7 | BSD License | https://palletsprojects.com/p/click/ |
 | colorama | 0.4.6 | BSD License | https://github.com/tartley/colorama |
@@ -439,7 +439,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-### certifi 2024.8.30 (Mozilla Public License 2.0 (MPL 2.0))
+### certifi 2026.10.23 (Mozilla Public License 2.0 (MPL 2.0))
 
 ```
 This package contains a modified version of ca-bundle.crt:
